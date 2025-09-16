@@ -109,6 +109,8 @@ Access CloudBeaver at [http://localhost:8978](http://localhost:8978) with:
 
 ## 2. Create a PostgreSQL Connection
 
+1. Run `docker compose up`
+
 1. Open CloudBeaver in your browser:  
    [http://localhost:8978](http://localhost:8978)
 
