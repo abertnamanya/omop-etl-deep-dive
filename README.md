@@ -60,17 +60,64 @@ sudo usermod -aG docker $USER
 
 ## Development
 
-### **Creating/Updating SQL Models**
-Models are SQL files that define the transformations and logic for your ETL process. They are located in the `core/models` directory of the project.
-For information on how to create SQL models, please refer to the [SQLMesh Models Overview documentation](https://sqlmesh.readthedocs.io/en/stable/concepts/models/overview/).
 
+### Usagi Mappings
+
+1. Open **Usagi** and import the file:
+
+   ```
+   concepts/selected_concepts_1to1_updated.csv
+   ```
+
+2. Perform your mappings inside Usagi.
+   When finished, go to **File > Save** (⚠️ do not use *Export*).
+
+3. Save the file inside the `concepts/` folder and rename it to:
+
+   ```
+   mapping.csv
+   ```
+
+4. This file will be automatically imported into the MySQL database `raw` under the view `CONCEPT_MAPPING`.
+   You can then reference it directly when writing SQL queries.
+
+
+### **Creating/Updating SQL Models**
+
+Models are SQL files that define the transformations and logic for your ETL process. They are located in the `core/models` directory of the project.
+For more details, see the [SQLMesh Models Overview documentation](https://sqlmesh.readthedocs.io/en/stable/concepts/models/overview/).
+
+---
+
+### **Applying Changes**
 
 Once you have created or updated your SQL models, you need to apply these changes to the database.
 
-   ```bash
-   docker compose run --rm core run-pipeline
-   ```
-Rerun this after making changes to model files.
+#### Option 1: Full Pipeline (PostgreSQL)
+
+This runs the entire ETL pipeline and creates all final tables in PostgreSQL:
+
+```bash
+docker compose run --rm core run-pipeline
+```
+
+---
+
+#### Option 2: Quick Preview (MySQL)
+
+If you only want to quickly check how your final tables will look, you can apply the plan to MySQL instead.
+This is much faster and useful for previewing results before running the full pipeline:
+
+```bash
+docker compose run --rm core apply-sqlmesh-plan
+```
+
+* Results will appear under the **MySQL connection** (host: `sqlmesh-db`)
+* Database name: `omop_db`
+* The resulting tables will show up as **views**.
+
+Once you’re satisfied with the structure in MySQL, you can run the full pipeline (Option 1) to generate the actual tables in PostgreSQL.
+
 
 Once the commands complete, your OMOP postgress dayabase will be updated with the latest transformations defined in your SQL models.
 You can access the database at `localhost:5433` with following credentials:
@@ -89,12 +136,13 @@ Access CloudBeaver at [http://localhost:8978](http://localhost:8978) with:
 
 - Then from the left sidebar, click on servers > OMOP Postgres to connect to the OMOP database.
 
+# Create DB Connections in CloudBeaver
 
-# Create a PostgreSQL Connection in CloudBeaver
+Make sure you run: `docker compose up`.
 
 ## 1. Create an Admin Account
 
-1. Open CloudBeaver in your browser:  
+1. Open CloudBeaver in your browser:
    [http://localhost:8978](http://localhost:8978)
 
 2. The **Setup Wizard** will appear the first time you run CloudBeaver.
@@ -107,31 +155,48 @@ Access CloudBeaver at [http://localhost:8978](http://localhost:8978) with:
 
 6. Use these credentials to log in to CloudBeaver.
 
+
 ## 2. Create a PostgreSQL Connection
 
-1. Run `docker compose up`
 
-1. Open CloudBeaver in your browser:  
+2. Open CloudBeaver in your browser:
    [http://localhost:8978](http://localhost:8978)
 
-2. Log in with your **CloudBeaver admin credentials**.
+3. Log in with your **CloudBeaver admin credentials**.
 
-3. From the top menu, click **New Connection**.
+4. From the top menu, click **New Connection**.
 
-4. In the connection type list, select **PostgreSQL**.
+5. In the connection type list, select **PostgreSQL**.
 
-5. Fill in the connection details:
-   - **Host**: `omop-db` (or your PostgreSQL host)
-   - **Port**: `5432` (default PostgreSQL port, update if different)
-   - **Database**: (enter your database name, e.g., `omop`)
-   - **User name**: `omop`
-   - **Password**: (your PostgreSQL user password)
+6. Fill in the connection details:
 
+    * **Host**: `omop-db` (or your PostgreSQL host)
+    * **Port**: `5432` (default PostgreSQL port, update if different)
+    * **Database**: (enter your database name, e.g., `omop`)
+    * **User name**: `omop`
+    * **Password**: (your PostgreSQL user password)
 6. (Optional) Click **Test Connection** to verify the details.
 
 7. Click **Create** to save the connection.
 
-<img src="/docs/img/initiate-new-connection.png"> width="600"/>
+## 3. Create a MySQL Connection
+
+1. From the top menu, click **New Connection**.
+
+2. In the connection type list, select **MySQL**.
+
+3. Fill in the connection details:
+
+    * **Host**: `sqlmesh-db`
+    * **Port**: `3306` (default MySQL port, update if different)
+    * **Database**: *(leave this field empty)*
+    * **User name**: `root`
+    * **Password**: `openmrs`
+7. Click **Create** to save the connection.
+
+
+
+<img src="/docs/img/initiate-new-connection.png"> 
 
 
 Once your work is done, you can stop the services with:

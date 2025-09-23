@@ -21,7 +21,7 @@ services:
     image: omop-etl-core
     container_name: core
     environment:
-      SRC_HOST: omrsdb
+      SRC_HOST: sqlmesh-db
       SRC_PORT: 3306
       SRC_USER: openmrs
       SRC_PASS: openmrs
