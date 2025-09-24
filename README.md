@@ -1,7 +1,26 @@
+# OMOP ETL Deep Dive - Getting Started Guide
 
-## Prerequisites
+This project helps you transform healthcare data from OpenMRS into the OMOP Common Data Model format using **SQLMesh** as the transformation engine. Don't worry if you're new to this - we'll guide you through each step!
 
-### Installing Docker
+## 📹 Session Recording
+
+This entire setup and workflow was covered in our previous call. You can watch the full recording here:
+**[OHDSI Africa Chapter - OMOP ETL Deep Dive Session](https://ohdsiorg.sharepoint.com/:v:/s/Chapter-Africa/EaOu_rXBPoJDiq_BGAMUfPUBIm-vd661Xv_Uy6EYV000dg?e=i2sUWd)**
+
+## Your Goal
+
+We've already mapped two entities during the call (**Location** and **Person**) - you can find these examples in the `core/models` folder. Your task is to **map the remaining OMOP entities** using these as reference templates.
+
+**Dataset Info:** You'll be working with a sample OpenMRS database containing **250 patients** to practice your transformations.
+
+## What You'll Need Before Starting
+
+- **Docker Desktop** installed on your computer ([Download here](https://www.docker.com/products/docker-desktop/))
+- **Basic command line knowledge** (we'll show you the exact commands to type)
+- About **30 minutes** for the initial setup
+
+
+#### Installing Docker
 
 <details>
 <summary>mac OS</summary>
@@ -57,150 +76,201 @@ sudo usermod -aG docker $USER
 
 </details>
 
-## Setting up the project
 
-1. Download the repository (or clone it with git):
-   https://github.com/jayasanka-sack/omop-etl-deep-dive/archive/refs/heads/main.zip
-2. Build images:
-    ```bash
-    docker compose --profile manual build
-   ```
-3. Start the services
+## Quick Start (3 Simple Steps)
+
+### Step 1: Get the Project Files
+
+**Option A: Download ZIP file (Recommended for beginners)**
+1. Visit: https://github.com/jayasanka-sack/omop-etl-deep-dive/archive/refs/heads/main.zip
+2. Download and extract the ZIP file to a folder on your computer
+3. Open your terminal/command prompt and navigate to that folder
+
+**Option B: Use Git (If you have Git installed)**
+```bash
+git clone https://github.com/jayasanka-sack/omop-etl-deep-dive.git
+cd omop-etl-deep-dive
+```
+
+### Step 2: Build the Project
+
+This step prepares all the necessary software components. It may take 5-10 minutes the first time.
+
+```bash
+docker compose --profile manual build
+```
+
+**What this does:** Downloads and sets up all the databases and tools you'll need.
+
+### Step 3: Start Everything
+
 ```bash
 docker compose up
 ```
 
-## Development
+**What this does:** Starts all the services including databases and web interfaces.
 
-
-### Usagi Mappings (optional)
-
-For this exercise you have provided a mapped concept file, so this step is optional. But in production, you should do the following.
-
-1. Open **Usagi** and import the file:
-
-   ```
-   concepts/selected_concepts_1to1_updated.csv
-   ```
-
-2. Perform your mappings inside Usagi.
-   When finished, go to **File > Save** (⚠️ do not use *Export*).
-
-3. Save the file inside the `concepts/` folder and rename it to:
-
-   ```
-   mapping.csv
-   ```
-
-4. This file will be automatically imported into the MySQL database `raw` under the view `CONCEPT_MAPPING`.
-   You can then reference it directly when writing SQL queries.
-
-### Accessing the Database with cloudBeaver
-If you want to explore the OMOP and openmrs databases using a graphical interface, you can use CloudBeaver. It is included in the current setup so you don't need to install it separately.
-
-Make sure you run: `docker compose up`.
-
-#### 1. Create an Admin Account
-
-1. Open CloudBeaver in your browser:
-   [http://localhost:8978](http://localhost:8978)
-
-2. The **Setup Wizard** will appear the first time you run CloudBeaver.
-
-3. Enter your desired **Admin username** (e.g., `cbadmin`).
-
-4. Enter and confirm your **Admin password** (e.g., `Admin@123`).
-
-5. Complete the wizard to create the admin account.
-
-6. Use these credentials to log in to CloudBeaver.
-
-
-#### 2. Create a PostgreSQL Connection
-
-
-2. Open CloudBeaver in your browser:
-   [http://localhost:8978](http://localhost:8978)
-
-3. Log in with your **CloudBeaver admin credentials**.
-
-4. From the top menu, click **New Connection**.
-   <img src="/docs/img/initiate-new-connection.png">
-
-5. In the connection type list, select **PostgreSQL**.
-
-6. Fill in the connection details:
-
-    * **Host**: `omop-db` 
-    * **Port**: `5432`
-    * **Database**: `omop`
-    * **User name**: `omop`
-    * **Password** `omop`:
-6. (Optional) Click **Test Connection** to verify the details.
-
-7. Click **Create** to save the connection.
-
-#### 3. Create a MySQL Connection
-
-1. From the top menu, click **New Connection**.
-
-2. In the connection type list, select **MySQL**.
-
-3. Fill in the connection details:
-
-    * **Host**: `sqlmesh-db`
-    * **Port**: `3306`
-    * **Database**: *(leave this field empty)*
-    * **User name**: `root`
-    * **Password**: `openmrs`
-7. Click **Create** to save the connection.
-
-
-### **Creating/Updating SQL Models**
-
-Models are SQL files that define the transformations and logic for your ETL process. They are located in the `core/models` directory of the project.
-For more details, see the [SQLMesh Models Overview documentation](https://sqlmesh.readthedocs.io/en/stable/concepts/models/overview/).
-
-
-#### **Applying Changes**
-
-Once you have created or updated your SQL models, you need to apply these changes to the database.
-
-##### Option 1: Full Pipeline (PostgreSQL)
-
-This runs the entire ETL pipeline and creates all final tables in PostgreSQL:
-
-```bash
-docker compose run --rm core run-pipeline
-```
+**✅ Success indicator:** You'll see messages saying services are ready. The process is complete when you stop seeing new log messages.
 
 ---
 
-##### Option 2: Quick Preview (MySQL)
+## What's Now Available?
 
-If you only want to quickly check how your final tables will look, you can apply the plan to MySQL instead.
-This is much faster and useful for previewing results before running the full pipeline:
+After running the setup, you'll have access to:
+
+- **CloudBeaver** (Database viewer): http://localhost:8978
+- **OMOP PostgreSQL Database**: Available at localhost:5433
+- **MySQL Database**: Contains OpenMRS DB and available internally for quick previews
+
+---
+
+## Working with Your Data
+
+### Understanding the Database Setup
+
+You now have three main databases:
+- **PostgreSQL** (omop-db): Your final OMOP-formatted data lives here
+- **MySQL** (sqlmesh-db): Contains two databases:
+    - `openmrs`: Your source OpenMRS dataset with 250 patients
+    - `omop_db`: Used for quick previews and intermediate processing
+
+### Viewing Your Data with CloudBeaver
+
+CloudBeaver is a web-based tool that lets you explore your databases without needing to install additional software.
+
+#### First Time Setup (Only do this once)
+
+1. **Open CloudBeaver**: Go to http://localhost:8978 in your web browser
+
+2. **Create Your Admin Account** (First time only):
+    - You'll see a Setup Wizard
+    - Choose any username (suggestion: `admin`)
+    - Choose any password (suggestion: `Admin@123` - remember this!)
+    - Click through to complete the setup
+    - Log in with these credentials
+
+#### Connect to Your Databases
+
+**Connect to PostgreSQL (Your main OMOP database):**
+
+1. Click **"New Connection"** from the top menu
+2. Select **"PostgreSQL"** from the list
+3. Fill in these exact details:
+    - **Host**: `omop-db`
+    - **Port**: `5432`
+    - **Database**: `omop`
+    - **Username**: `omop`
+    - **Password**: `omop`
+4. Click **"Test Connection"** to make sure it works
+5. Click **"Create"**
+
+**Connect to MySQL (For source data and previews):**
+
+1. Click **"New Connection"** again
+2. Select **"MySQL"** from the list
+3. Fill in these exact details:
+    - **Host**: `sqlmesh-db`
+    - **Port**: `3306`
+    - **Database**: *(leave empty)*
+    - **Username**: `root`
+    - **Password**: `openmrs`
+4. Click **"Create"**
+
+**Important:** Once connected, you'll see two databases:
+- `openmrs`: Your source data with 250 patients
+- `omop_db`: Preview results from your transformations (available only when you run the pipeline at least once)
+
+---
+
+## Customizing Your Data Transformation
+
+### Understanding SQL Models & SQLMesh
+
+The transformation magic happens using **SQLMesh**, a powerful data transformation framework. Your transformation logic is defined in SQL files located in the `core/models` folder.
+
+**Think of it like this:**
+- Raw OpenMRS data (250 patients) goes in → SQLMesh processes your SQL models → Clean OMOP data comes out
+
+**What's Already Done:**
+- ✅ **Location** entity mapping (see `core/models/location.sql`)
+- ✅ **Person** entity mapping (see `core/models/person.sql`)
+
+**Your Task:**
+- 🎯 Map the remaining OMOP entities using the existing models as templates
+- Use the same patterns and structure you see in the completed examples
+
+### Making Changes to Your Data Processing
+
+1. **Edit SQL files** in the `core/models` directory using any text editor
+2. **Test your changes** using one of the options below
+
+### Option 1: Quick Preview (Recommended for testing)
+
+Perfect for checking if your changes work before running the full process:
 
 ```bash
 docker compose run --rm core apply-sqlmesh-plan
 ```
 
-* Results will appear under the **MySQL connection** (host: `sqlmesh-db`)
-* Database name: `omop_db`
-* The resulting tables will show up as **views**.
+**What this does:**
+- Runs your transformations quickly in MySQL
+- Creates preview tables you can check in CloudBeaver
+- Look for results under the MySQL connection → `omop_db` database
+- Results appear as "views" (think of them as virtual tables)
 
-Once you’re satisfied with the structure in MySQL, you can run the full pipeline (Option 1) to generate the actual tables in PostgreSQL.
+### Option 2: Full Production Run
+
+Once you're happy with your preview, run the complete pipeline:
+
+```bash
+docker compose run --rm core run-pipeline
+```
+
+**What this does:**
+- Runs the complete ETL process
+- Creates final tables in your PostgreSQL OMOP database
+- Takes longer but gives you the final production-ready data
+
+---
+
+## Working with Concept Mappings (Advanced - Optional)
+
+**What are concept mappings?** They help translate your local medical codes to standard OMOP codes.
+
+We've provided pre-made mappings, so you can skip this section initially. When you're ready to create custom mappings:
+
+1. Open the **Usagi** tool (included in the project)
+2. Import: `concepts/selected_concepts_1to1_updated.csv`
+3. Create your mappings
+4. Save (don't export!) as `concepts/mapping.csv`
+
+The system will automatically use your new mappings.
+
+---
+
+## Direct Database Access (For Advanced Users)
+
+If you prefer using other database tools, you can connect directly:
+
+**PostgreSQL (Final OMOP Data):**
+- **Host**: localhost
+- **Port**: 5433
+- **Database**: omop
+- **Username**: omop
+- **Password**: omop
 
 
-Once the commands complete, your OMOP postgress dayabase will be updated with the latest transformations defined in your SQL models.
-You can access the database at `localhost:5433` with following credentials:
-- **Database:** omop
-- **User:** omop
-- **Password:** omop
-- **host:** localhost
-- **Port:** 5433
+## 🎉 Congratulations!
 
-### 🎉 _That's it! You now have a local OMOP CDM database populated with data from OpenMRS!!_
+You now have a working OMOP ETL system! Your OpenMRS data is being transformed into the standard OMOP format, making it ready for research and analysis.
+
+**Next steps:**
+- Explore your data using CloudBeaver
+- Try making small changes to the SQL models
+- Run the preview command to see your changes in action
+
+**Need help?** Check the project's GitHub issues page or documentation for more advanced topics.
+
 
 
 
@@ -208,6 +278,45 @@ Once your work is done, you can stop the services with:
 
 ```bash
 docker compose stop
+```
+
+---
+
+## Troubleshooting Common Issues
+
+**"Docker command not found"**
+- Make sure Docker Desktop is installed and running
+
+**"Port already in use"**
+
+* Option 1: Stop applications using the conflicting ports
+* Option 2: Change the ports in your docker-compose.yml file
+*
+* To change ports, find the ports: sections and update the left side (your computer's port):
+```yaml
+* ports:
+- "change_this_port:8978"  # CloudBeaver
+```
+Example: If port 8978 is busy, change it to 8979:
+```yaml
+ports:
+- "8979:8978"  # Now access CloudBeaver at localhost:8979
+```
+Note: Only change the number before the colon. The number after the colon must stay the same.**"Connection refused" in CloudBeaver**
+
+**"Connection refused" in CloudBeaver**
+- Wait a few minutes after running `docker compose up`
+- Make sure all services are fully started (check the logs)
+
+**Changes not showing up**
+- Make sure you ran either the preview or full pipeline command after making changes
+- Check that your SQL syntax is correct
+
+**You see pointer files instead of actual data when opening a large file (e.g., `CONCEPT.csv`)**
+it means Git LFS is not set up correctly. Run:
+
+```sh
+git lfs pull
 ```
 
 ### Fancy a User Interface?
@@ -218,8 +327,7 @@ docker compose stop
 
 Access the UI at [http://localhost:8000](http://localhost:8000)
    
-<img src="/docs/img/sql_mesh.jpeg" alt="SQLMesh UI"> width="600"/>
-
+<img src="/docs/img/sql_mesh.jpeg" alt="SQLMesh UI"> 
 -- 
 
 <summary>Fancy a Data Quality Check? (This will cover on upcoming weeks)</summary>
@@ -303,12 +411,10 @@ git lfs pull
 
 This ensures all large files are properly downloaded.
 
-### Troubleshooting
-If you see pointer files instead of actual data when opening a large file (e.g., `CONCEPT.csv`), it means Git LFS is not set up correctly. Run:
 
-```sh
-git lfs pull
-```
+
+---
+
 
 For more information, refer to the [Git LFS documentation](https://git-lfs.github.com/).
 </details>
