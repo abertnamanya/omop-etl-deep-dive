@@ -57,11 +57,25 @@ sudo usermod -aG docker $USER
 
 </details>
 
+## Setting up the project
+
+1. Download the repository (or clone it with git):
+   https://github.com/jayasanka-sack/omop-etl-deep-dive/archive/refs/heads/main.zip
+2. Build images:
+    ```bash
+    docker compose --profile manual build
+   ```
+3. Start the services
+```bash
+docker compose up
+```
 
 ## Development
 
 
-### Usagi Mappings
+### Usagi Mappings (optional)
+
+For this exercise you have provided a mapped concept file, so this step is optional. But in production, you should do the following.
 
 1. Open **Usagi** and import the file:
 
@@ -81,19 +95,78 @@ sudo usermod -aG docker $USER
 4. This file will be automatically imported into the MySQL database `raw` under the view `CONCEPT_MAPPING`.
    You can then reference it directly when writing SQL queries.
 
+### Accessing the Database with cloudBeaver
+If you want to explore the OMOP and openmrs databases using a graphical interface, you can use CloudBeaver. It is included in the current setup so you don't need to install it separately.
+
+Make sure you run: `docker compose up`.
+
+#### 1. Create an Admin Account
+
+1. Open CloudBeaver in your browser:
+   [http://localhost:8978](http://localhost:8978)
+
+2. The **Setup Wizard** will appear the first time you run CloudBeaver.
+
+3. Enter your desired **Admin username** (e.g., `cbadmin`).
+
+4. Enter and confirm your **Admin password** (e.g., `Admin@123`).
+
+5. Complete the wizard to create the admin account.
+
+6. Use these credentials to log in to CloudBeaver.
+
+
+#### 2. Create a PostgreSQL Connection
+
+
+2. Open CloudBeaver in your browser:
+   [http://localhost:8978](http://localhost:8978)
+
+3. Log in with your **CloudBeaver admin credentials**.
+
+4. From the top menu, click **New Connection**.
+   <img src="/docs/img/initiate-new-connection.png">
+
+5. In the connection type list, select **PostgreSQL**.
+
+6. Fill in the connection details:
+
+    * **Host**: `omop-db` 
+    * **Port**: `5432`
+    * **Database**: `omop`
+    * **User name**: `omop`
+    * **Password** `omop`:
+6. (Optional) Click **Test Connection** to verify the details.
+
+7. Click **Create** to save the connection.
+
+#### 3. Create a MySQL Connection
+
+1. From the top menu, click **New Connection**.
+
+2. In the connection type list, select **MySQL**.
+
+3. Fill in the connection details:
+
+    * **Host**: `sqlmesh-db`
+    * **Port**: `3306`
+    * **Database**: *(leave this field empty)*
+    * **User name**: `root`
+    * **Password**: `openmrs`
+7. Click **Create** to save the connection.
+
 
 ### **Creating/Updating SQL Models**
 
 Models are SQL files that define the transformations and logic for your ETL process. They are located in the `core/models` directory of the project.
 For more details, see the [SQLMesh Models Overview documentation](https://sqlmesh.readthedocs.io/en/stable/concepts/models/overview/).
 
----
 
-### **Applying Changes**
+#### **Applying Changes**
 
 Once you have created or updated your SQL models, you need to apply these changes to the database.
 
-#### Option 1: Full Pipeline (PostgreSQL)
+##### Option 1: Full Pipeline (PostgreSQL)
 
 This runs the entire ETL pipeline and creates all final tables in PostgreSQL:
 
@@ -103,7 +176,7 @@ docker compose run --rm core run-pipeline
 
 ---
 
-#### Option 2: Quick Preview (MySQL)
+##### Option 2: Quick Preview (MySQL)
 
 If you only want to quickly check how your final tables will look, you can apply the plan to MySQL instead.
 This is much faster and useful for previewing results before running the full pipeline:
@@ -129,74 +202,6 @@ You can access the database at `localhost:5433` with following credentials:
 
 ### 🎉 _That's it! You now have a local OMOP CDM database populated with data from OpenMRS!!_
 
-### Accessing the Database with cloudBeaver
-If you want to explore the OMOP database using a graphical interface, you can use CloudBeaver. It is included in the current setup so you don't need to install it separately.
-
-Access CloudBeaver at [http://localhost:8978](http://localhost:8978) with:
-
-- Then from the left sidebar, click on servers > OMOP Postgres to connect to the OMOP database.
-
-# Create DB Connections in CloudBeaver
-
-Make sure you run: `docker compose up`.
-
-## 1. Create an Admin Account
-
-1. Open CloudBeaver in your browser:
-   [http://localhost:8978](http://localhost:8978)
-
-2. The **Setup Wizard** will appear the first time you run CloudBeaver.
-
-3. Enter your desired **Admin username** (e.g., `cbadmin`).
-
-4. Enter and confirm your **Admin password** (e.g., `Admin@123`).
-
-5. Complete the wizard to create the admin account.
-
-6. Use these credentials to log in to CloudBeaver.
-
-
-## 2. Create a PostgreSQL Connection
-
-
-2. Open CloudBeaver in your browser:
-   [http://localhost:8978](http://localhost:8978)
-
-3. Log in with your **CloudBeaver admin credentials**.
-
-4. From the top menu, click **New Connection**.
-
-5. In the connection type list, select **PostgreSQL**.
-
-6. Fill in the connection details:
-
-    * **Host**: `omop-db` (or your PostgreSQL host)
-    * **Port**: `5432` (default PostgreSQL port, update if different)
-    * **Database**: (enter your database name, e.g., `omop`)
-    * **User name**: `omop`
-    * **Password**: (your PostgreSQL user password)
-6. (Optional) Click **Test Connection** to verify the details.
-
-7. Click **Create** to save the connection.
-
-## 3. Create a MySQL Connection
-
-1. From the top menu, click **New Connection**.
-
-2. In the connection type list, select **MySQL**.
-
-3. Fill in the connection details:
-
-    * **Host**: `sqlmesh-db`
-    * **Port**: `3306` (default MySQL port, update if different)
-    * **Database**: *(leave this field empty)*
-    * **User name**: `root`
-    * **Password**: `openmrs`
-7. Click **Create** to save the connection.
-
-
-
-<img src="/docs/img/initiate-new-connection.png"> 
 
 
 Once your work is done, you can stop the services with:
