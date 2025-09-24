@@ -87,6 +87,8 @@ sudo usermod -aG docker $USER
 3. Open your terminal/command prompt and navigate to that folder
 
 **Option B: Use Git (If you have Git installed)**
+
+Make sure you have LFS installed. Check [Setting Up git LFS](#setting-up-git-lfs)
 ```bash
 git clone https://github.com/jayasanka-sack/omop-etl-deep-dive.git
 cd omop-etl-deep-dive
@@ -366,7 +368,7 @@ docker compose run achilles
 
 
 
-
+##### Setting Up Git LFS
 <summary>Setting Up Git LFS for This Repository</summary>
 
 <details>
