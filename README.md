@@ -332,9 +332,9 @@ Access the UI at [http://localhost:8000](http://localhost:8000)
 <img src="/docs/img/sql_mesh.jpeg" alt="SQLMesh UI"> 
 -- 
 
-<summary>Fancy a Data Quality Check? (This will cover on upcoming weeks)</summary>
+## Fancy a Data Quality Check? (This will cover on upcoming weeks)
 
-<details>
+
 
 ### 1. **Run Achilles to generate data summaries** (Check What Achilles does below.)
    ```
@@ -364,7 +364,7 @@ docker compose run achilles
 - ✅ Produces results in the Achilles_results and Achilles_analysis tables
 - ✅ Prepares your OMOP CDM for use with the web-based Atlas UI
 
-</details>
+
 
 
 
