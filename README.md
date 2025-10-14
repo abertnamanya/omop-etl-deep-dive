@@ -346,7 +346,7 @@ This runs the [OHDSI Data Quality Dashboard (DQD)](https://github.com/OHDSI/Data
     docker compose run --rm dqd run 
    ```
 ### 3. **View the Data Quality Dashboard**
-      This serves the DQD results on a local web server. Once it's running, open your browser and go to [http://localhost:3000](http://localhost:3000).
+This serves the DQD results on a local web server. Once it's running, open your browser and go to [http://localhost:3000](http://localhost:3000).
    ```
    docker compose run --rm --service-ports dqd view
    ``` 

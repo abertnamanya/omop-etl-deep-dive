@@ -57,8 +57,8 @@ services:
       POSTGRES_DB: omop
       POSTGRES_USER: omop
       POSTGRES_PASSWORD: omop
-#    ports:
-#      - "5433:5432"
+    ports:
+      - "5433:5432"
 #    volumes:
 #      - ./omop-ddl/processed/ddl:/docker-entrypoint-initdb.d
   achilles:
